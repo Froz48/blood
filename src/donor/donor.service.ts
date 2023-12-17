@@ -12,6 +12,7 @@ import { updateDonorDto } from './dto/updateDonor.dto';
 
 @Injectable()
 export class donorService{
+    static Object: any;
     constructor(
         @InjectRepository(donorEntity) 
         private readonly donorRepository: Repository<donorEntity>,
@@ -42,7 +43,7 @@ export class donorService{
         delete donor.password
         return donor
     }
-
+    
     async findById(id: number): Promise<donorEntity>{
         return this.donorRepository.findOneBy({id : id})
     }

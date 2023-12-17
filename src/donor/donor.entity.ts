@@ -1,5 +1,6 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { hash } from "bcrypt";
+import { donationEntity } from "@app/donation/donation.entity";
 
 
 @Entity({name: 'donor'})
@@ -17,11 +18,17 @@ export class donorEntity {
     @Column({default : false})
     isHonorable: boolean
 
+    @Column({default: 0})
+    donationCount: number
+
+    @Column({default: 0})
+    lastDonationDate: number
 
     @BeforeInsert()
     async hashPassword(){
         this.password = await hash(this.password, 10);
     }
 
-
+    @OneToMany(()=>donationEntity, (donation)=> donation.donor)    
+    donations: donationEntity[]
 }
