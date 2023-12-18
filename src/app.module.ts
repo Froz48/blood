@@ -6,9 +6,10 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import ormconfig from '@app/ormconfig';
 import { donorModule } from './donor/donor.module';
 import { authMiddleware } from './donor/middlewares/auth.middleware';
+import { facilityModule } from './facility/facility.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(ormconfig), donationModule, donorModule],
+  imports: [TypeOrmModule.forRoot(ormconfig), donationModule, donorModule, facilityModule],
   controllers: [AppController],
   providers: [AppService],
 })

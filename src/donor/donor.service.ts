@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { createDonorDto } from './dto/createDonor.dto';
 import { donorEntity } from './donor.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,8 +7,9 @@ import { sign } from 'jsonwebtoken';
 import { donorResponseInterface } from './types/donorResponse.Interface';
 import { loginDonorDto } from './dto/login.dto';
 import {compare} from 'bcrypt'
-import { JWT_SECRET } from '@app/config';
+import { DonationCountToBeHonorable, JWT_SECRET, TimeBetweenDonations } from '@app/config';
 import { updateDonorDto } from './dto/updateDonor.dto';
+import { facilityService } from '@app/facility/facility.service';
 
 @Injectable()
 export class donorService{
@@ -16,8 +17,10 @@ export class donorService{
     constructor(
         @InjectRepository(donorEntity) 
         private readonly donorRepository: Repository<donorEntity>,
+        @Inject(facilityService)
+        private readonly facilityService: facilityService
         ){}
-
+ 
     async createDonor(createDonorDto: createDonorDto) : Promise<donorEntity>{
         const donorByUsername = await this.donorRepository.findOneBy({
             username : createDonorDto.username,
@@ -29,6 +32,10 @@ export class donorService{
         Object.assign(newDonor, createDonorDto);
         console.log('newDonor', newDonor);
         return await this.donorRepository.save(newDonor);
+    }
+
+    async facilitiesByCity(str: string){
+        return await this.facilityService.getFacilitiesByCity(str)
     }
 
     async login(loginDonorDto: loginDonorDto): Promise<donorEntity>{
@@ -45,13 +52,32 @@ export class donorService{
     }
     
     async findById(id: number): Promise<donorEntity>{
-        return this.donorRepository.findOneBy({id : id})
+        return await this.donorRepository.findOneBy({id : id})
     }
 
     async updateDonor(donorId: number, updateDonorDto: updateDonorDto): Promise<donorEntity> {
         const donor = await this.findById(donorId)
         Object.assign(donor, updateDonorDto)
         return await this.donorRepository.save(donor)
+    }
+
+    async newDonation(donorId: number) : Promise<donorEntity>{
+        const donor = await this.findById(donorId)
+        donor.donationCount++
+        donor.lastDonationDate = new Date();
+        donor.lastDonationDate.setHours(0,0,0,0)
+        if (donor.donationCount >= DonationCountToBeHonorable){
+            donor.isHonorable = true
+        }
+        return await this.donorRepository.save(donor)
+    }
+
+    async nextDonationDate(donorId: number){
+        const donor = await this.findById(donorId)
+        if (donor.lastDonationDate.getTime()+(TimeBetweenDonations) < new Date().getTime()){
+            return 'now'
+        }
+        return new Date(donor.lastDonationDate.getTime()+(TimeBetweenDonations))
     }
 
     generateJwt(donor : donorEntity): string {

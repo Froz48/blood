@@ -9,10 +9,13 @@ import { Donor } from './decorators/donor.decorator';
 import { donorEntity } from './donor.entity';
 import { AuthGuard } from './guards/auth.guard';
 import { updateDonorDto } from './dto/updateDonor.dto';
+import { createDonationDto } from '@app/donation/dto/createDonationDto.dto';
+import { facilityService } from '@app/facility/facility.service';
 
 @Controller()
 export class donorController{
-    constructor(private readonly donorService: donorService){}
+    constructor(private readonly donorService: donorService,
+        private readonly facilityService: facilityService){}
 
     @Post('donor')
     @UsePipes(new ValidationPipe())
@@ -36,14 +39,31 @@ export class donorController{
         return this.donorService.buildDonorResponse(donor)
     }
 
+    @Get('facilities')
+    @UseGuards(AuthGuard)
+    async facilitiesInCity(@Donor('city') dc: string){
+        return this.donorService.facilitiesByCity(dc)
+    }
+
+    @Get('facilities/myblood')
+    @UseGuards(AuthGuard)
+    async facilitiesWithMyBlood(@Donor('bloodType') bt: string){
+        return this.facilityService.getFacilitiesWithBlood(bt)
+        
+    }
+
+    @Get('donor/nextDonationDate')
+        async nextDonationDate(@Body()dto: createDonationDto){
+        return this.donorService.nextDonationDate(dto.donorId)
+    }
+
     @Put('donor')
     @UseGuards(AuthGuard)
     async updateCurrentDonor(
-        @Donor('id') currentDonorId: number, 
-        @Body('donor') updateDonorDto: updateDonorDto): 
-        Promise<donorResponseInterface>{
+            @Donor('id') currentDonorId: number, 
+            @Body('donor') updateDonorDto: updateDonorDto): 
+            Promise<donorResponseInterface>{
         const donor = await this.donorService.updateDonor(currentDonorId, updateDonorDto)
-    
-    return this.donorService.buildDonorResponse(donor)
+        return this.donorService.buildDonorResponse(donor)
     };
 }

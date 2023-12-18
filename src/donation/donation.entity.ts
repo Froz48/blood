@@ -9,6 +9,14 @@ export class donationEntity{
     @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
     date: Date
 
+    @Column({default: 'blood'})
+    donationType: string
+
+    /*
+    @Column({default: 'blood'})
+    documentId: number
+    */
+
     @ManyToOne(()=> donorEntity, (donor)=>donor.donations)
     donor: donorEntity
 }

@@ -19,11 +19,13 @@ export class donationService{
     }
 
     async createDonation(createDonationDto: createDonationDto): Promise<donationEntity>{
-        const newDonation = new donationEntity() 
-        newDonation.donor = await this.donorService.findById(createDonationDto.donorId)     
+        const newDonation = new donationEntity()
+        newDonation.date = new Date()
+        newDonation.date.setHours(0,0,0,0)
+        newDonation.donor = await this.donorService.findById(createDonationDto.donorId)
         Object.assign(newDonation, createDonationDto)
-        
         console.log('newDonation', newDonation)
+        this.donorService.newDonation(createDonationDto.donorId)
         return await this.donationRepository.save(newDonation)
     }
 }

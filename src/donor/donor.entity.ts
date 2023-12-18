@@ -18,11 +18,17 @@ export class donorEntity {
     @Column({default : false})
     isHonorable: boolean
 
+    @Column({default : 'unknown'})
+    bloodType: string
+
+    @Column({default: 'unknown'})
+    city: string
+
     @Column({default: 0})
     donationCount: number
 
-    @Column({default: 0})
-    lastDonationDate: number
+    @Column({type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
+    lastDonationDate: Date
 
     @BeforeInsert()
     async hashPassword(){
