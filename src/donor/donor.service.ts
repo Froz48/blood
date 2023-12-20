@@ -55,6 +55,10 @@ export class donorService{
         return await this.donorRepository.findOneBy({id : id})
     }
 
+    async findHonorableDonors(): Promise<donorEntity[]>{
+        return await this.donorRepository.findBy({isHonorable : true})
+    }
+
     async updateDonor(donorId: number, updateDonorDto: updateDonorDto): Promise<donorEntity> {
         const donor = await this.findById(donorId)
         Object.assign(donor, updateDonorDto)
@@ -75,7 +79,7 @@ export class donorService{
     async nextDonationDate(donorId: number){
         const donor = await this.findById(donorId)
         if (donor.lastDonationDate.getTime()+(TimeBetweenDonations) < new Date().getTime()){
-            return 'now'
+            return new Date()
         }
         return new Date(donor.lastDonationDate.getTime()+(TimeBetweenDonations))
     }

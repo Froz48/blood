@@ -22,7 +22,8 @@ export class donationController{
 
     @Post()
     async createDonation(@Body('donation') createDonationDto: createDonationDto){
-        
-        return this.donationService.createDonation(createDonationDto)
+        const a = await this.donationService.createDonation(createDonationDto)
+        if (a == null){return "Declined"}
+        return a
     }
 }

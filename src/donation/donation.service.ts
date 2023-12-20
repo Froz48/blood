@@ -19,13 +19,16 @@ export class donationService{
     }
 
     async createDonation(createDonationDto: createDonationDto): Promise<donationEntity>{
+        if ((await this.donorService.nextDonationDate(createDonationDto.donorId)).getTime() > new Date().getTime()){
+            console.log("returned null")
+            return null
+        }
         const newDonation = new donationEntity()
         newDonation.date = new Date()
         newDonation.date.setHours(0,0,0,0)
         newDonation.donor = await this.donorService.findById(createDonationDto.donorId)
         Object.assign(newDonation, createDonationDto)
-        console.log('newDonation', newDonation)
-        this.donorService.newDonation(createDonationDto.donorId)
+        await this.donorService.newDonation(createDonationDto.donorId)
         return await this.donationRepository.save(newDonation)
     }
 }

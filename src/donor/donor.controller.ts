@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { donorService } from './donor.service';
 import { createDonorDto } from './dto/createDonor.dto';
 import { donorResponseInterface } from './types/donorResponse.Interface';
@@ -11,6 +11,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { updateDonorDto } from './dto/updateDonor.dto';
 import { createDonationDto } from '@app/donation/dto/createDonationDto.dto';
 import { facilityService } from '@app/facility/facility.service';
+import { facilityWithBloodDto } from '@app/facility/dto/facilityWithBloodDto.dto';
 
 @Controller()
 export class donorController{
@@ -39,7 +40,7 @@ export class donorController{
         return this.donorService.buildDonorResponse(donor)
     }
 
-    @Get('facilities')
+    @Get('facilities/mycity') 
     @UseGuards(AuthGuard)
     async facilitiesInCity(@Donor('city') dc: string){
         return this.donorService.facilitiesByCity(dc)
@@ -49,7 +50,17 @@ export class donorController{
     @UseGuards(AuthGuard)
     async facilitiesWithMyBlood(@Donor('bloodType') bt: string){
         return this.facilityService.getFacilitiesWithBlood(bt)
-        
+    }
+
+    @Get('facilities/blood')
+    async facilitiesByBlood(@Query('value') value: string) {
+        console.log("val = ", value)
+        return this.facilityService.getFacilitiesWithBlood(value);
+    }
+
+    @Get('donor/honorable')
+    async showHonorables(){
+        return await this.donorService.findHonorableDonors()
     }
 
     @Get('donor/nextDonationDate')

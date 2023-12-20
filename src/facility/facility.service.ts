@@ -32,6 +32,8 @@ export class facilityService{
         return res
     }
 
+    
+
     async getFacilitiesByCity(str: string): Promise<facilityEntity[]>{
         return await this.facilityRepository.findBy({city: str})
     }
